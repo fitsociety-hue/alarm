@@ -101,13 +101,28 @@ class BoardNotifier:
                         
                         title = item.get_text(strip=True)
                         
-                        # 상위 요소에서 작성자와 날짜 정보 찾기
-                        parent = item.find_parent()
-                        author = ""
-                        date = ""
+                        # 상위 요소(div.bo_tit) 찾기
+                        # ul.bo_tit_ul2 -> div.bo_tit
+                        parent_ul = item.find_parent('ul')
+                        grandparent_div = parent_ul.find_parent('div')
                         
-                        # 간단한 방법으로 데이터 추출
-                        # 실제 HTML 구조에 따라 조정 필요
+                        author = "정보 없음"
+                        date = "정보 없음"
+                        
+                        if grandparent_div:
+                            info_ul = grandparent_div.find('ul', class_='bo_tit_ul3')
+                            if info_ul:
+                                # 작성자
+                                author_li = info_ul.find('li', class_='name')
+                                if author_li:
+                                    author = author_li.get_text(strip=True)
+                                
+                                # 날짜 (li.date 혹은 순서로 찾기)
+                                date_li = info_ul.find('li', class_='date')
+                                if date_li:
+                                    # 아이콘 텍스트 제외하고 날짜만 추출
+                                    date = date_li.get_text(strip=True)
+                        
                         post_info = {
                             "id": wr_id,
                             "title": title,
