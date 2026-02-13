@@ -1,6 +1,8 @@
 name: Board Notification
 
 on:
+  push:
+    branches: [ "main" ]
   schedule:
     # KST is UTC+9
     # 09:10 KST -> 00:10 UTC
