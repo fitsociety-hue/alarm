@@ -1,0 +1,48 @@
+name: Board Notification
+
+on:
+  schedule:
+    # KST is UTC+9
+    # 09:10 KST -> 00:10 UTC
+    # 11:00 KST -> 02:00 UTC
+    # 13:30 KST -> 04:30 UTC
+    # 15:00 KST -> 06:00 UTC
+    # 17:00 KST -> 08:00 UTC
+    - cron: '10 0 * * *'
+    - cron: '0 2 * * *'
+    - cron: '30 4 * * *'
+    - cron: '0 6 * * *'
+    - cron: '0 8 * * *'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  check-board:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run check_board.py
+      env:
+        WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+        BOARD_URL: "https://gde.or.kr/counseling"
+      run: python check_board.py
+
+    - name: Commit and push if changes
+      run: |
+        git config --global user.name "Board Notification Bot"
+        git config --global user.email "bot@example.com"
+        git add last_checked.json
+        git commit -m "Update last checked status" || echo "No changes to commit"
+        git push

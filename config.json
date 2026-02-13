@@ -1,0 +1,13 @@
+{
+    "board_url": "https://gde.or.kr/counseling",
+    "webhook_url": "https://chat.googleapis.com/v1/spaces/AAQAgEojpEM/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=lHoNXFFS4eC3hGLkcce_ZLF_nfAWH_g3c4FIy6Xl3OA",
+    "check_times": [
+        "09:10",
+        "11:00",
+        "13:30",
+        "15:00",
+        "17:00"
+    ],
+    "last_checked_file": "last_checked.json",
+    "notification_recipient": "alias1004@gde.or.kr"
+}
