@@ -30,7 +30,7 @@ function kstToUtcCron(hour, min) {
 
 // UTC Cron -> KST Time string "HH:MM (AM/PM)"
 function utcCronToKst(cronStr) {
-    const match = cronStr.match(/- cron:\s*'(\d+)\s+(\d+)\s+\*\s+\*\s+[1-5\*]'/);
+    const match = cronStr.match(/- cron:\s*['"](\d+)\s+(\d+).*?['"]/);
     if (!match) return null;
 
     let min = parseInt(match[1], 10);
@@ -136,7 +136,7 @@ btnModalConfirm.addEventListener('click', () => {
     let ampm = h >= 12 ? 'PM' : 'AM';
     let displayHour = h % 12 || 12;
     const displayTime = `${String(displayHour).padStart(2, '0')}:${String(m).padStart(2, '0')} ${ampm}`;
-    const cronExpr = `    ${kstToUtcCron(h, m)}`; // 들여쓰기 포함
+    const cronExpr = kstToUtcCron(h, m); // 들여쓰기 제거 후 순수 cron 문자열만 저장
 
     cronSchedules.push({ hour: h, minute: m, displayTime, cronExpr });
     cronSchedules.sort((a, b) => (a.hour * 60 + a.minute) - (b.hour * 60 + b.minute));
@@ -182,7 +182,7 @@ btnSave.addEventListener('click', () => {
                 newLines.push(line);
                 newLines.push('    # KST is UTC+9');
                 cronSchedules.forEach(s => {
-                    newLines.push(s.cronExpr);
+                    newLines.push(`    ${s.cronExpr}`); // 들여쓰기 추가
                 });
                 scheduleAdded = true;
                 continue;
