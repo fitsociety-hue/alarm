@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div class="background-shapes">
         <div class="shape shape-1"></div>
@@ -21,37 +23,21 @@
             <p>이용상담문의 게시판 알림 시간을 직관적으로 관리하세요.</p>
         </header>
 
-        <section class="glass-panel config-section">
-            <h2>⚙️ GitHub 연동 설정</h2>
-            <p class="desc">알림 주기를 변경하기 위해 저장소 접근 권한이 필요합니다.</p>
-            <div class="input-group">
-                <label for="github-pat">Personal Access Token (PAT)</label>
-                <input type="password" id="github-pat" placeholder="ghp_************************************">
-            </div>
-            <div class="input-group">
-                <label for="github-repo">저장소 (Owner/Repo)</label>
-                <input type="text" id="github-repo" value="fitsociety-hue/alarm" placeholder="예: username/repository">
-            </div>
-            <button id="btn-load" class="btn primary-btn"> 설정 불러오기</button>
-        </section>
-
-        <div id="loading-overlay" class="hidden">
-            <div class="spinner"></div>
-            <p>처리 중...</p>
-        </div>
-
         <section id="schedule-section" class="glass-panel schedule-section hidden">
             <div class="section-header">
-                <h2>🕒 현재 알림 스케줄</h2>
+                <h2>🕒 알림 스케줄 설정</h2>
                 <button id="btn-add-time" class="btn outline-btn">+ 시간 추가</button>
             </div>
-            
+
+            <p class="desc">한국 시간(KST) 기준으로 알림을 보낼 시간을 설정하세요.<br>
+                저장 버튼을 누르면 코드가 복사되며, GitHub 에디터가 자동으로 열립니다.</p>
+
             <div id="time-list" class="time-list">
                 <!-- 동적으로 시간 아이템이 추가됨 -->
             </div>
 
             <div class="action-buttons">
-                <button id="btn-save" class="btn primary-btn full-width">변경 사항 저장 및 적용</button>
+                <button id="btn-save" class="btn primary-btn full-width">코드 복사 & 적용 창 열기</button>
             </div>
             <p id="status-message" class="status-msg"></p>
         </section>
@@ -74,4 +60,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>
