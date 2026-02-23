@@ -200,7 +200,8 @@ class BoardNotifier:
         
         for fmt in formats:
             try:
-                return datetime.strptime(date_str, fmt)
+                dt = datetime.strptime(date_str, fmt)
+                return dt.replace(tzinfo=KST)
             except ValueError:
                 continue
         
@@ -211,7 +212,8 @@ class BoardNotifier:
             extracted = match.group(1)
             for fmt in formats:
                 try:
-                    return datetime.strptime(extracted, fmt)
+                    dt = datetime.strptime(extracted, fmt)
+                    return dt.replace(tzinfo=KST)
                 except ValueError:
                     continue
         
