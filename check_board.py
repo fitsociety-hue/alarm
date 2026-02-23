@@ -8,10 +8,13 @@
 import json
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Optional
 import requests
 from bs4 import BeautifulSoup
+
+# 한국 표준시(KST) 설정
+KST = timezone(timedelta(hours=9))
 
 
 class BoardNotifier:
@@ -165,7 +168,7 @@ class BoardNotifier:
         """마지막 확인 상태 저장"""
         data = {
             "last_post_ids": post_ids,
-            "last_check_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            "last_check_time": datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S")
         }
         
         with open(self.last_checked_file, 'w', encoding='utf-8') as f:
@@ -236,7 +239,7 @@ class BoardNotifier:
         new_posts_raw = [post for post in current_posts if post['id'] in new_post_ids]
         
         # 날짜 필터: 30일 이상 오래된 게시글은 새 글로 처리하지 않음
-        now = datetime.now()
+        now = datetime.now(KST)
         cutoff_date = now - timedelta(days=30)
         
         new_posts = []
@@ -297,7 +300,7 @@ class BoardNotifier:
     
     def _create_message(self, post: Dict) -> Dict:
         """Google Chat 메시지 생성"""
-        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        current_time = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S")
         
         message = {
             "text": f"🔔 *새 게시글 알림*",
@@ -355,7 +358,7 @@ class BoardNotifier:
     def run(self):
         """메인 실행 함수"""
         print("=" * 60)
-        print(f"[INFO] 게시판 모니터링 시작: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"[INFO] 게시판 모니터링 시작: {datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"[INFO] 게시판 URL: {self.board_url}")
         print("=" * 60)
         
@@ -378,7 +381,7 @@ class BoardNotifier:
         self.save_last_checked(current_post_ids)
         
         print("=" * 60)
-        print(f"[OK] 모니터링 완료: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"[OK] 모니터링 완료: {datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 60)
 
 
