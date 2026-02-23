@@ -148,7 +148,9 @@ btnModalConfirm.addEventListener('click', () => {
 // 페이지 로드 시 공개 리포지토리에서 바로 읽어오기
 window.addEventListener('DOMContentLoaded', async () => {
     try {
-        const response = await fetch('https://raw.githubusercontent.com/fitsociety-hue/alarm/main/.github/workflows/notify.yml');
+        // 캐시 방지를 위해 고유 타임스탬프 쿼리 파라미터 추가
+        const t = new Date().getTime();
+        const response = await fetch(`https://raw.githubusercontent.com/fitsociety-hue/alarm/main/.github/workflows/notify.yml?t=${t}`);
         if (!response.ok) throw new Error("설정 파일을 불러올 수 없습니다.");
 
         const yamlContent = await response.text();
