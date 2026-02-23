@@ -5,16 +5,12 @@ on:
     branches: [ "main" ]
   schedule:
     # KST is UTC+9
-    # 09:10 KST -> 00:10 UTC
-    # 11:00 KST -> 02:00 UTC
-    # 13:30 KST -> 04:30 UTC
-    # 15:00 KST -> 06:00 UTC
+    # 09:30 KST -> 00:30 UTC
+    # 14:00 KST -> 05:00 UTC
     # 17:00 KST -> 08:00 UTC
-    - cron: '10 0 * * *'
-    - cron: '0 2 * * *'
-    - cron: '30 4 * * *'
-    - cron: '0 6 * * *'
-    - cron: '0 8 * * *'
+    - cron: '30 0 * * 1-5'
+    - cron: '0 5 * * 1-5'
+    - cron: '0 8 * * 1-5'
   workflow_dispatch:  # Allow manual trigger
 
 permissions:

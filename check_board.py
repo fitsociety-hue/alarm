@@ -8,7 +8,7 @@
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Dict, Optional
 import requests
 from bs4 import BeautifulSoup
@@ -171,9 +171,55 @@ class BoardNotifier:
         with open(self.last_checked_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
+    def _parse_post_date(self, date_str: str) -> Optional[datetime]:
+        """
+        게시글 날짜 문자열을 datetime 객체로 변환
+        
+        Args:
+            date_str: '2025-03-14' 또는 '25-03-14' 형태의 날짜 문자열
+            
+        Returns:
+            datetime 객체 또는 None (파싱 실패 시)
+        """
+        if not date_str or date_str == '정보 없음':
+            return None
+        
+        # 아이콘 텍스트 등 불필요한 문자 제거
+        date_str = date_str.strip()
+        
+        # 다양한 날짜 형식 시도
+        formats = [
+            '%Y-%m-%d',   # 2025-03-14
+            '%y-%m-%d',   # 25-03-14
+            '%Y.%m.%d',   # 2025.03.14
+            '%y.%m.%d',   # 25.03.14
+        ]
+        
+        for fmt in formats:
+            try:
+                return datetime.strptime(date_str, fmt)
+            except ValueError:
+                continue
+        
+        # 날짜 패턴만 추출 시도 (예: '아이콘2025-03-14' -> '2025-03-14')
+        import re
+        match = re.search(r'(\d{2,4}[-.]\d{2}[-.]\d{2})', date_str)
+        if match:
+            extracted = match.group(1)
+            for fmt in formats:
+                try:
+                    return datetime.strptime(extracted, fmt)
+                except ValueError:
+                    continue
+        
+        return None
+
     def find_new_posts(self, current_posts: List[Dict]) -> List[Dict]:
         """
         새로운 게시글 찾기
+        
+        ID 기반으로 새 글을 찾되, 작성일이 30일 이상 지난 글은 제외합니다.
+        (오래된 글이 ID 목록에 없더라도 알림 대상에서 제외)
         
         Args:
             current_posts: 현재 게시판의 게시글 목록
@@ -187,7 +233,20 @@ class BoardNotifier:
         current_post_ids = {post['id'] for post in current_posts}
         new_post_ids = current_post_ids - last_post_ids
         
-        new_posts = [post for post in current_posts if post['id'] in new_post_ids]
+        new_posts_raw = [post for post in current_posts if post['id'] in new_post_ids]
+        
+        # 날짜 필터: 30일 이상 오래된 게시글은 새 글로 처리하지 않음
+        now = datetime.now()
+        cutoff_date = now - timedelta(days=30)
+        
+        new_posts = []
+        for post in new_posts_raw:
+            post_date = self._parse_post_date(post.get('date', ''))
+            if post_date is not None:
+                if post_date < cutoff_date:
+                    print(f"[SKIP] 오래된 게시글 제외 (작성일: {post['date']}): {post['title']}")
+                    continue
+            new_posts.append(post)
         
         print(f"[NEW] {len(new_posts)}개의 새 게시글을 발견했습니다.")
         return new_posts
