@@ -243,9 +243,17 @@ class BoardNotifier:
         for post in new_posts_raw:
             post_date = self._parse_post_date(post.get('date', ''))
             if post_date is not None:
+                # 현재 연도와 다른 게시글 제외 (예: 2025년 게시글)
+                if post_date.year != now.year:
+                    print(f"[SKIP] 다른 연도 게시글 제외 (작성일: {post['date']}): {post['title']}")
+                    continue
                 if post_date < cutoff_date:
                     print(f"[SKIP] 오래된 게시글 제외 (작성일: {post['date']}): {post['title']}")
                     continue
+            else:
+                # 날짜 파싱 실패 시 안전하게 제외
+                print(f"[SKIP] 날짜 정보 파싱 실패로 제외: {post['title']} (date: {post.get('date', 'N/A')})")
+                continue
             new_posts.append(post)
         
         print(f"[NEW] {len(new_posts)}개의 새 게시글을 발견했습니다.")
