@@ -18,12 +18,10 @@ echo [INFO] Found Python at: %PYTHON_EXE%
 echo [INFO] Script Path: %SCRIPT_PATH%
 echo.
 
-:: Register Tasks
-call :RegisterTask 09:10
-call :RegisterTask 11:00
-call :RegisterTask 13:30
-call :RegisterTask 15:00
-call :RegisterTask 17:00
+:: Register Tasks (09:30, 14:00, 17:30 KST)
+call :RegisterTask 09:30
+call :RegisterTask 14:00
+call :RegisterTask 17:30
 
 echo.
 echo [SUCCESS] All tasks scheduling attempts finished.

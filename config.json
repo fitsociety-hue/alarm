@@ -4,7 +4,7 @@
     "check_times": [
         "09:30",
         "14:00",
-        "17:00"
+        "17:30"
     ],
     "last_checked_file": "last_checked.json",
     "notification_recipient": "alias1004@gde.or.kr"
