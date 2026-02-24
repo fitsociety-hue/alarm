@@ -8,10 +8,15 @@
 import json
 import os
 import sys
+import argparse
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Optional
 import requests
 from bs4 import BeautifulSoup
+
+# 허용된 알림 시간 (KST) - 이 시간 ±10분 이내에만 알림 전송
+ALLOWED_TIMES = [(9, 30), (14, 0), (17, 0)]
+TIME_TOLERANCE_MINUTES = 10
 
 # 한국 표준시(KST) 설정
 KST = timezone(timedelta(hours=9))
@@ -357,12 +362,53 @@ class BoardNotifier:
         
         return message
     
-    def run(self):
-        """메인 실행 함수"""
+    @staticmethod
+    def is_allowed_time(now: datetime = None) -> bool:
+        """
+        현재 시간이 허용된 알림 시간(±10분) 내인지 확인
+        
+        허용 시간: 09:30, 14:00, 17:00 KST
+        각 시간 전후 10분 이내에만 True 반환
+        """
+        if now is None:
+            now = datetime.now(KST)
+        
+        for hour, minute in ALLOWED_TIMES:
+            scheduled = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+            diff = abs((now - scheduled).total_seconds()) / 60
+            if diff <= TIME_TOLERANCE_MINUTES:
+                print(f"[TIME] 허용 시간 확인: {hour:02d}:{minute:02d} (±{TIME_TOLERANCE_MINUTES}분) ✅")
+                return True
+        
+        return False
+
+    def run(self, force: bool = False):
+        """메인 실행 함수
+        
+        Args:
+            force: True이면 시간 제한 무시 (수동 테스트용)
+        """
+        now = datetime.now(KST)
         print("=" * 60)
-        print(f"[INFO] 게시판 모니터링 시작: {datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"[INFO] 게시판 모니터링 시작: {now.strftime('%Y-%m-%d %H:%M:%S')}")
         print(f"[INFO] 게시판 URL: {self.board_url}")
+        print(f"[INFO] 허용 시간: {', '.join(f'{h:02d}:{m:02d}' for h, m in ALLOWED_TIMES)} (±{TIME_TOLERANCE_MINUTES}분)")
         print("=" * 60)
+        
+        # 시간 제한 검사 (--force 또는 GitHub Actions 환경이면 건너뜀)
+        is_github_actions = os.environ.get('GITHUB_ACTIONS') == 'true'
+        
+        if not force and not is_github_actions and not self.is_allowed_time(now):
+            print(f"[BLOCKED] 현재 시간({now.strftime('%H:%M')})은 허용된 알림 시간이 아닙니다.")
+            print(f"[BLOCKED] 허용 시간: {', '.join(f'{h:02d}:{m:02d}' for h, m in ALLOWED_TIMES)}")
+            print(f"[BLOCKED] 알림을 전송하지 않습니다. (--force 옵션으로 강제 실행 가능)")
+            print("=" * 60)
+            return
+        
+        if force:
+            print("[INFO] --force 옵션: 시간 제한을 무시합니다.")
+        if is_github_actions:
+            print("[INFO] GitHub Actions 환경 감지: 스케줄에 의해 실행됨")
         
         # 1. 게시판에서 게시글 가져오기
         current_posts = self.fetch_board_posts()
@@ -389,13 +435,18 @@ class BoardNotifier:
 
 def main():
     """메인 함수"""
+    parser = argparse.ArgumentParser(description='게시판 알림 시스템')
+    parser.add_argument('--force', action='store_true',
+                        help='시간 제한을 무시하고 강제 실행')
+    args = parser.parse_args()
+    
     # 스크립트 디렉토리로 작업 디렉토리 변경
     script_dir = os.path.dirname(os.path.abspath(__file__))
     os.chdir(script_dir)
     
     # 알림 시스템 실행
     notifier = BoardNotifier()
-    notifier.run()
+    notifier.run(force=args.force)
 
 
 if __name__ == "__main__":
