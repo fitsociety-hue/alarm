@@ -18,13 +18,39 @@ echo [INFO] Found Python at: %PYTHON_EXE%
 echo [INFO] Script Path: %SCRIPT_PATH%
 echo.
 
-:: Register Tasks (09:30, 14:00, 17:30 KST)
+:: ============================================
+:: Step 1: Delete ALL old scheduled tasks first
+:: ============================================
+echo [CLEANUP] Removing all old scheduled tasks...
+schtasks /Delete /TN "BoardNotification_0910" /F >nul 2>&1
+schtasks /Delete /TN "BoardNotification_1100" /F >nul 2>&1
+schtasks /Delete /TN "BoardNotification_1330" /F >nul 2>&1
+schtasks /Delete /TN "BoardNotification_1500" /F >nul 2>&1
+schtasks /Delete /TN "BoardNotification_1700" /F >nul 2>&1
+schtasks /Delete /TN "BoardNotification_1730" /F >nul 2>&1
+schtasks /Delete /TN "BoardNotification_0930" /F >nul 2>&1
+schtasks /Delete /TN "BoardNotification_1400" /F >nul 2>&1
+echo [CLEANUP] Old tasks removed.
+echo.
+
+:: ============================================
+:: Step 2: Register exactly 3 tasks
+::   09:30 KST - Check for posts from prev day 17:00 ~ today 09:30
+::   14:00 KST - Check for posts from 09:30 ~ 14:00
+::   17:00 KST - Check for posts from 14:00 ~ 17:00
+:: ============================================
 call :RegisterTask 09:30
 call :RegisterTask 14:00
-call :RegisterTask 17:30
+call :RegisterTask 17:00
 
 echo.
-echo [SUCCESS] All tasks scheduling attempts finished.
+echo [SUCCESS] All tasks registered successfully.
+echo.
+echo Registered tasks:
+echo   1) BoardNotification_0930 - 09:30 KST
+echo   2) BoardNotification_1400 - 14:00 KST
+echo   3) BoardNotification_1700 - 17:00 KST
+echo.
 echo Press any key to exit...
 pause
 exit /b 0
@@ -35,7 +61,7 @@ set TASK_NAME=BoardNotification_%TIME::=%
 
 echo Registering task: %TASK_NAME% at %TIME%...
 
-:: Delete if exists
+:: Delete if exists (safety)
 schtasks /Delete /TN "%TASK_NAME%" /F >nul 2>&1
 
 :: Create Task
